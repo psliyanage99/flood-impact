@@ -2,6 +2,7 @@ package com.floodapp.flood_impact.controller;
 
 import com.floodapp.flood_impact.model.Report;
 import com.floodapp.flood_impact.repository.ReportRepository;
+import com.floodapp.flood_impact.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,37 +12,29 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reports")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ReportController {
     @Autowired
-    private ReportRepository reportRepository;
+    private ReportService reportService;
 
     // Get All Reports
     @GetMapping
     public List<Report> getAllReports() {
-        return reportRepository.findAll();
+        // This call is now cached!
+        return reportService.getAllReports();
     }
 
     // Create Report
     @PostMapping
     public Report createReport(@RequestBody Report report) {
-        if (report.getStatus() == null || report.getStatus().isEmpty()) {
-            report.setStatus("active");
-        }
-        return reportRepository.save(report);
+        return reportService.createReport(report);
     }
 
     // --- NEW: Resolve Report (Removes from Map, Updates Stats) ---
     @PutMapping("/{id}/resolve")
     public ResponseEntity<Report> resolveReport(@PathVariable Long id) {
-        Optional<Report> reportOpt = reportRepository.findById(id);
-        if (reportOpt.isPresent()) {
-            Report report = reportOpt.get();
-            report.setStatus("resolved"); // Mark as resolved in DB
-            final Report updatedReport = reportRepository.save(report);
-            return ResponseEntity.ok(updatedReport);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return reportService.resolveReport(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Loader, LogIn, UserPlus, ArrowLeft, KeyRound, Activity, UserCog } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const Login = ({ onLogin }) => {
   const [view, setView] = useState('login'); // login, register, forgot, admin
   const [formData, setFormData] = useState({ email: '', password: '', name: '', role: 'user' });
@@ -31,7 +32,8 @@ const Login = ({ onLogin }) => {
     
     try {
       const endpoint = view === 'register' ? '/api/auth/register' : '/api/auth/login';
-      const response = await axios.post(`http://localhost:8080${endpoint}`, formData);
+
+      const response = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
       const userData = response.data;
 
       // --- SECURITY CHECK FOR ADMIN LOGIN ---
@@ -69,7 +71,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     setError('');
     try {
-        await axios.post('http://localhost:8080/api/auth/forgot-password', { email: formData.email });
+        await axios.post('${API_BASE_URL}/api/auth/forgot-password', { email: formData.email });
         setSuccess(`Reset link sent to ${formData.email}`);
         setTimeout(() => setView('login'), 3000);
     } catch (err) {
@@ -84,7 +86,7 @@ const Login = ({ onLogin }) => {
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
       try {
-        const res = await axios.post('http://localhost:8080/api/auth/google', { token: tokenResponse.access_token });
+        const res = await axios.post(`${API_BASE_URL}/api/auth/google`, { token: tokenResponse.access_token });
         setSuccess('Google login successful!');
         setTimeout(() => handleLoginSuccess(res.data), 1000);
       } catch (err) {

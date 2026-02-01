@@ -12,7 +12,7 @@ function App() {
   const [pickedLocation, setPickedLocation] = useState(null);
   
   const [isInitializing, setIsInitializing] = useState(true);
-  const SESSION_DURATION = 5 * 60 * 1000; 
+  const SESSION_DURATION = 60 * 60 * 1000; 
 
   useEffect(() => {
     const checkSession = () => {

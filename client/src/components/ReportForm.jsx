@@ -17,6 +17,8 @@ import {
   Check
 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [formData, setFormData] = useState({
@@ -88,7 +90,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
       (error) => {
         setStatus({ 
           type: 'error', 
-          msg: '❌ Location access denied. Please use the map picker or enter coordinates manually.' 
+          msg: 'Location access denied. Please use the map picker or enter coordinates manually.' 
         });
         setLoadingLoc(false);
         setTimeout(() => setStatus({ type: '', msg: '' }), 5000);
@@ -101,7 +103,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
     setSubmitting(true);
     
     try {
-      await axios.post('http://localhost:8080/api/reports', formData);
+      await axios.post(`${API_BASE_URL}/api/reports`, formData);
       setShowSuccess(true);
       
       // Reset form after delay
@@ -122,7 +124,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
     } catch (err) {
       setStatus({ 
         type: 'error', 
-        msg: '❌ Error submitting report. Please try again.' 
+        msg: 'Error submitting report. Please try again.' 
       });
       setTimeout(() => setStatus({ type: '', msg: '' }), 5000);
     } finally {

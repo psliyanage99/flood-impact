@@ -18,7 +18,7 @@ public class EmailService {
         message.setText("Hello,\n\n" +
                 "We received a request to reset your password for your Flood Damage Tracker account.\n\n" +
                 "Please click the link below to reset your password:\n" +
-                "http://localhost:5173/reset-password?email=" + toEmail + "\n\n" +
+                "https://floodimpact.online/reset-password?email=" + toEmail + "\n\n" +
                 "If you did not request this, please ignore this email.\n\n" +
                 "Best regards,\nFlood Tracker Team");
 

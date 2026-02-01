@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@CrossOrigin(origins = "*", allowCredentials = "*")
 public class AuthController {
 
     @Autowired
@@ -25,7 +25,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public User register(@RequestBody User user) {
-        // Ensure regular registration always sets role to "user"
         user.setRole("user");
         return userRepository.save(user);
     }
