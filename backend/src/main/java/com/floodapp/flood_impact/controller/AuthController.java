@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*", allowCredentials = "*")
+@CrossOrigin(origins = {"http://localhost:5173", "https://floodimpact.online"})
 public class AuthController {
 
     @Autowired

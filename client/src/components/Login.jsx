@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Loader, LogIn, UserPlus, ArrowLeft, KeyRound, Activity, UserCog } from 'lucide-react';
+import logo from '../assets/app_logoo.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const Login = ({ onLogin }) => {
@@ -117,9 +118,24 @@ const Login = ({ onLogin }) => {
           <div className="p-6 md:p-8 pb-4 text-center">
             <div className="flex justify-center mb-6">
               <div className="relative">
+                {/* Glow Effect Background */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${view === 'admin' ? 'from-purple-300/50 to-pink-300/50' : 'from-blue-300/50 to-indigo-300/50'} rounded-3xl blur-xl`}></div>
-                <div className={`relative w-20 h-20 bg-gradient-to-br ${view === 'admin' ? 'from-purple-600 to-pink-600' : 'from-blue-600 to-indigo-600'} rounded-2xl flex items-center justify-center shadow-lg`}>
-                  {view === 'admin' ? <UserCog className="w-10 h-10 text-white" /> : <Activity className="w-10 h-10 text-white" />}
+                
+                {/* Icon Container */}
+                <div className={`relative w-20 h-20 bg-gradient-to-br ${view === 'admin' ? 'from-purple-600 to-pink-600' : 'from-blue-600 to-indigo-600'} rounded-2xl flex items-center justify-center shadow-lg overflow-hidden`}>
+                  
+                  {/* LOGIC CHANGE HERE: Check if Admin */}
+                  {view === 'admin' ? (
+                    // Keep Admin Icon
+                    <UserCog className="w-10 h-10 text-white" />
+                  ) : (
+                    // Use Custom Logo for everyone else
+                    <img 
+                      src={logo} 
+                      alt="Flood Impact Logo" 
+                      className="w-full h-full object-cover" 
+                    />
+                  )}
                 </div>
               </div>
             </div>

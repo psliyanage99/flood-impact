@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reports")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = {"http://localhost:5173", "https://floodimpact.online"})
 public class ReportController {
     @Autowired
     private ReportService reportService;

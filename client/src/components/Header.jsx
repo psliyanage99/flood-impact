@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, AlertTriangle, LogOut, User, Menu, X, Bell, Settings, ChevronDown } from 'lucide-react';
+import logo from '../assets/app_logoo.png';
 
 const Header = ({ user, onLogout, currentView, onReportClick, onDashboardClick }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,21 +47,29 @@ const Header = ({ user, onLogout, currentView, onReportClick, onDashboardClick }
           
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4 group cursor-pointer" onClick={onDashboardClick}>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                <div className="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all group-hover:scale-105">
-                  <svg className="w-8 h-8 fill-white" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" className="animate-pulse"/>
-                    <path d="M2 17L12 22L22 17"/>
-                    <path d="M2 12L12 17L22 12"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="hidden md:block">
-                <h1 className="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Flood Command</h1>
-                <p className="text-xs text-gray-600 font-medium tracking-wide">Infrastructure Monitoring</p>
+            <div className="relative">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
+              
+              {/* Icon Container */}
+              <div className="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all group-hover:scale-105 overflow-hidden">
+                
+                {/* --- CHANGE START: Replaced SVG with Logo --- */}
+                <img 
+                  src={logo} 
+                  alt="Logo" 
+                  className="w-full h-full object-cover" 
+                />
+                {/* --- CHANGE END --- */}
+
               </div>
             </div>
+            
+            <div className="hidden md:block">
+              <h1 className="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Infrastructure Command</h1>
+              <p className="text-xs text-gray-600 font-medium tracking-wide">Infrastructure Monitoring</p>
+            </div>
+          </div>
 
             <nav className="hidden lg:flex items-center gap-2 ml-8">
               <button onClick={onDashboardClick} className={`relative px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${currentView === 'dashboard' ? 'text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
