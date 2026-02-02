@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Disallow admin pages to keep them secure/private
+Disallow: /admin
+Disallow: /api
+
+Sitemap: https://floodimpact.online/sitemap.xml
