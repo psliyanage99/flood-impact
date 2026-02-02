@@ -110,38 +110,6 @@ const Login = ({ onLogin }) => {
 
   return (
     <>
-    <Helmet>
-        <title>Infrastructure Command | Flood & Disaster Management Sri Lanka</title>
-        <meta name="description" content="Report and track infrastructure damage caused by Cyclone Ditva in Sri Lanka. Real-time flood monitoring and disaster relief coordination system." />
-        <meta name="keywords" content="Sri Lanka floods, Cyclone Ditva, Infrastructure map, disaster management, flood relief, road blockages" />
-
-        {/* Social Media Tags (Open Graph) */}
-        <meta property="og:title" content="Infrastructure Command - Sri Lanka Flood Relief" />
-        <meta property="og:description" content="Help map damaged infrastructure and blocked roads in Sri Lanka. Crowdsourced disaster management for Cyclone Ditva." />
-        <meta property="og:image" content="https://floodimpact.online/preview-image.png" />
-        <meta property="og:url" content="https://floodimpact.online" />
-        <meta property="og:type" content="website" />
-
-        <script type="application/ld+json">
-        {`
-          {
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Infrastructure Command",
-            "url": "https://floodimpact.online",
-            "description": "Crowdsourced infrastructure damage reporting system for Sri Lanka floods.",
-            "applicationCategory": "DisasterManagement",
-            "operatingSystem": "Web",
-            "areaServed": "Sri Lanka",
-            "author": {
-              "@type": "Person",
-              "name": "Praneeth Sandaruwan"
-            }
-          }
-        `}
-        </script>
-      </Helmet>
-
       <div className="min-h-[100dvh] w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 md:p-6 overflow-y-auto">
         <div className="fixed inset-0 bg-[linear-gradient(to_right,#e0e7ff_1px,transparent_1px),linear-gradient(to_bottom,#e0e7ff_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none"></div>
         
