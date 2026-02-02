@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Loader, LogIn, UserPlus, ArrowLeft, KeyRound, Activity, UserCog } from 'lucide-react';
 import logo from '../assets/app_logoo.png';
-import { Helmet } from 'react-helmet-async';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const Login = ({ onLogin }) => {

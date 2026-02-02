@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, RadialLinearScale, Title, Tooltip, Legend, ArcElement, Filler } from 'chart.js';
 import { AlertTriangle, TrendingUp, MapPin, Clock, Filter, Download, RefreshCw, Bell, ChevronDown, Activity, Zap, Shield, Droplets, Navigation, Info, Users, CheckCircle, Wind, Eye, AlertCircle, CloudRain, Calendar, TrendingDown, BarChart3, Settings, Phone, Mail, Github, Linkedin, Twitter, Heart, FileText, Menu, X, CheckSquare } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, RadialLinearScale, Title, Tooltip, Legend, ArcElement, Filler);
 
