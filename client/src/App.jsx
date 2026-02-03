@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard';
 import ReportForm from './components/ReportForm';
 import Header from './components/Header';
 import LocationPickerMap from './components/LocationPickerMap';
+import VerifyEmail from './components/VerifyEmail'; // Import the new component
 import { Loader } from 'lucide-react';
 
 function App() {
@@ -11,11 +12,22 @@ function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [pickedLocation, setPickedLocation] = useState(null);
   
+  // New state to handle verification view
+  const [isVerifying, setIsVerifying] = useState(false);
+  
   const [isInitializing, setIsInitializing] = useState(true);
   const SESSION_DURATION = 60 * 60 * 1000; 
 
   useEffect(() => {
     const checkSession = () => {
+      // 1. Check if this is a verification URL (e.g. ?mode=verify)
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('token')) {
+        setIsVerifying(true);
+        setIsInitializing(false);
+        return;
+      }
+
       const storedData = localStorage.getItem('floodTrackerSession');
       
       if (storedData) {
@@ -52,6 +64,13 @@ function App() {
     localStorage.removeItem('floodTrackerSession'); 
   };
 
+  // Clears the verification URL and returns to login
+  const handleBackToLogin = () => {
+    setIsVerifying(false);
+    // Remove the query parameters from URL without reloading
+    window.history.replaceState({}, document.title, "/");
+  };
+
   const openMapPicker = () => {
     setCurrentView('map-picker');
   };
@@ -69,6 +88,11 @@ function App() {
         </div>
       </div>
     );
+  }
+
+  // If verifying, show the verification component independent of user state
+  if (isVerifying) {
+    return <VerifyEmail onBackToLogin={handleBackToLogin} />;
   }
 
   return (

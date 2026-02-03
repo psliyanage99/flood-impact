@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useGoogleLogin } from '@react-oauth/google';
-import { Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Loader, LogIn, UserPlus, ArrowLeft, KeyRound, Activity, UserCog } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Loader, ArrowLeft, UserCog } from 'lucide-react';
 import logo from '../assets/app_logoo.png';
+import { Helmet } from 'react-helmet-async';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const Login = ({ onLogin }) => {
   const [view, setView] = useState('login'); // login, register, forgot, admin
   const [formData, setFormData] = useState({ email: '', password: '', name: '', role: 'user' });
@@ -14,15 +16,14 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('floodTrackerSession');
-    if (savedUser) {
-        // Logic handled in App.jsx
-    }
-  }, []);
-
-  const handleLoginSuccess = (userData) => {
-    onLogin(userData);
+  // Clear errors when switching views manually
+  const switchView = (newView) => {
+    setView(newView);
+    setError('');
+    setSuccess('');
+    // Only clear data if USER clicks the button manually.
+    // (We don't use this function after registration success, so data stays)
+    setFormData({ email: '', password: '', name: '', role: 'user' });
   };
 
   const handleSubmit = async (e) => {
@@ -33,35 +34,60 @@ const Login = ({ onLogin }) => {
     
     try {
       const endpoint = view === 'register' ? '/api/auth/register' : '/api/auth/login';
-
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
       const userData = response.data;
 
-      // --- SECURITY CHECK FOR ADMIN LOGIN ---
+      // --- 1. HANDLE REGISTRATION SUCCESS ---
+      if (view === 'register') {
+          // Inform user about email verification
+          setSuccess('Registration successful! Please check your email to verify your account.');
+          
+          setTimeout(() => {
+              // Switch to Login View
+              setView('login'); 
+              
+              // PRESERVE INPUT DATA
+              // We keep email and password so the user doesn't have to retype them.
+              // We only clear the 'name' since login doesn't need it.
+              setFormData(prev => ({
+                  ...prev,
+                  name: '', 
+                  // email and password remain populated from '...prev'
+              }));
+
+              // Helper message on login screen
+              setSuccess('Please check your email inbox to verify your account before logging in.'); 
+          }, 3000); // Wait 3 seconds so they can read the first message
+
+          return; // STOP here (do not auto-login)
+      }
+
+      // --- 2. HANDLE LOGIN SUCCESS ---
       if (view === 'admin') {
-          // If user tries to login as admin but the DB says they are NOT an admin
           if (userData.role !== 'admin') {
               setError("Access Denied: You do not have Administrator privileges.");
               setLoading(false);
               return;
           }
-          setSuccess('Admin credentials verified. Accessing Dashboard...');
-      } else if (view === 'register') {
-          setSuccess('Account created successfully!');
+          setSuccess('Admin verified. Accessing Dashboard...');
       } else {
           setSuccess('Login successful!');
       }
 
-      // Proceed to login
+      // Proceed to Dashboard (Only happens for Login/Admin, not Register)
       setTimeout(() => {
-        handleLoginSuccess(userData);
+        onLogin(userData);
       }, 1000);
 
     } catch (error) {
-      const errorMsg = error.response?.data?.message || 'Authentication failed. Please check your credentials.';
+      // Handle errors (e.g., "Email not verified")
+      const errorMsg = error.response?.data?.message || 'Authentication failed.';
       setError(errorMsg);
     } finally {
-        if (view !== 'admin') { // Keep loading spinner for admin transition
+        // Stop loading spinner
+        if (view === 'register' || error) {
+            setLoading(false);
+        } else if (view !== 'admin' && !success) {
             setLoading(false);
         }
     }
@@ -72,7 +98,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     setError('');
     try {
-        await axios.post('${API_BASE_URL}/api/auth/forgot-password', { email: formData.email });
+        await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, { email: formData.email });
         setSuccess(`Reset link sent to ${formData.email}`);
         setTimeout(() => setView('login'), 3000);
     } catch (err) {
@@ -82,14 +108,13 @@ const Login = ({ onLogin }) => {
     }
   };
 
-  // --- GOOGLE LOGIN HOOK ---
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
       try {
         const res = await axios.post(`${API_BASE_URL}/api/auth/google`, { token: tokenResponse.access_token });
         setSuccess('Google login successful!');
-        setTimeout(() => handleLoginSuccess(res.data), 1000);
+        setTimeout(() => onLogin(res.data), 1000);
       } catch (err) {
         setError('Google login failed.');
       } finally {
@@ -99,16 +124,13 @@ const Login = ({ onLogin }) => {
     onError: () => setError('Google login failed.'),
   });
 
-  const switchView = (newView) => {
-    setView(newView);
-    setError('');
-    setSuccess('');
-    // Reset form but keep role as 'user' by default for security
-    setFormData({ email: '', password: '', name: '', role: 'user' });
-  };
-
   return (
     <>
+      <Helmet>
+        <title>Infrastructure Command | Sri Lanka Flood Relief</title>
+        <meta name="description" content="Report and track infrastructure damage caused by Cyclone Ditva." />
+      </Helmet>
+
       <div className="min-h-[100dvh] w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 md:p-6 overflow-y-auto">
         <div className="fixed inset-0 bg-[linear-gradient(to_right,#e0e7ff_1px,transparent_1px),linear-gradient(to_bottom,#e0e7ff_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none"></div>
         
@@ -119,46 +141,27 @@ const Login = ({ onLogin }) => {
             <div className="p-6 md:p-8 pb-4 text-center">
               <div className="flex justify-center mb-6">
                 <div className="relative">
-                  {/* Glow Effect Background */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${view === 'admin' ? 'from-purple-300/50 to-pink-300/50' : 'from-blue-300/50 to-indigo-300/50'} rounded-3xl blur-xl`}></div>
-                  
-                  {/* Icon Container */}
                   <div className={`relative w-20 h-20 bg-gradient-to-br ${view === 'admin' ? 'from-purple-600 to-pink-600' : 'from-blue-600 to-indigo-600'} rounded-2xl flex items-center justify-center shadow-lg overflow-hidden`}>
-                    
-                    {/* LOGIC CHANGE HERE: Check if Admin */}
-                    {view === 'admin' ? (
-                      // Keep Admin Icon
-                      <UserCog className="w-10 h-10 text-white" />
-                    ) : (
-                      // Use Custom Logo for everyone else
-                      <img 
-                        src={logo} 
-                        alt="Flood Impact Logo" 
-                        className="w-full h-full object-cover" 
-                      />
-                    )}
+                    {view === 'admin' ? <UserCog className="w-10 h-10 text-white" /> : <img src={logo} alt="Logo" className="w-full h-full object-cover" />}
                   </div>
                 </div>
               </div>
-              
               <h1 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
                 {view === 'admin' ? 'Admin Portal' : 'Infrastructure Command'}
               </h1>
-              <p className="text-gray-600 text-sm font-medium">
-                {view === 'admin' ? 'Secure Access Required' : 'Flood Damage Management System'}
-              </p>
             </div>
 
-            {/* Error/Success Messages */}
+            {/* Notifications */}
             <div className="px-6 md:px-8">
               {error && (
-                <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-center gap-3 animate-[slideDown_0.3s_ease-out]">
+                <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-center gap-3 animate-pulse">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
                   <span className="text-red-700 text-sm font-semibold">{error}</span>
                 </div>
               )}
               {success && (
-                <div className="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-xl flex items-center gap-3 animate-[slideDown_0.3s_ease-out]">
+                <div className="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-xl flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span className="text-green-700 text-sm font-semibold">{success}</span>
                 </div>
@@ -168,51 +171,74 @@ const Login = ({ onLogin }) => {
             {/* Forms */}
             {view === 'forgot' ? (
               <form onSubmit={handleForgotPassword} className="px-6 md:px-8 pb-6 md:pb-8 space-y-4">
-                <div className="text-center mb-4"><p className="text-gray-600 text-sm">Enter email to reset password</p></div>
-                <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl" placeholder="Email" />
-                <button type="submit" disabled={loading} className="w-full p-4 bg-blue-600 text-white rounded-xl font-bold">{loading ? 'Sending...' : 'Send Link'}</button>
-                <button type="button" onClick={() => switchView('login')} className="w-full py-2 text-sm text-gray-600 font-semibold">Back to Login</button>
+                 <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl" placeholder="Email" />
+                 <button type="submit" disabled={loading} className="w-full p-4 bg-blue-600 text-white rounded-xl font-bold">{loading ? 'Sending...' : 'Send Link'}</button>
+                 <button type="button" onClick={() => switchView('login')} className="w-full py-2 text-sm text-gray-600 font-semibold">Back to Login</button>
               </form>
             ) : (
               <form onSubmit={handleSubmit} className="px-6 md:px-8 pb-6 md:pb-8 space-y-4">
-                {/* Registration Fields - Role Input is Hidden intentionally */}
+                
+                {/* NAME INPUT (Only for Register) */}
                 {view === 'register' && (
                   <div className="relative">
-                    <input type="text" className="w-full p-4 pl-12 bg-white border-2 border-gray-200 rounded-xl font-medium" placeholder="Full Name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                    <input 
+                      key="name-input" // Helps React track this field
+                      type="text" 
+                      className="w-full p-4 pl-12 bg-white border-2 border-gray-200 rounded-xl font-medium" 
+                      placeholder="Full Name" 
+                      required 
+                      value={formData.name} 
+                      onChange={e => setFormData({...formData, name: e.target.value})} 
+                    />
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   </div>
                 )}
 
+                {/* EMAIL INPUT */}
                 <div className="relative">
-                  <input type="email" className="w-full p-4 pl-12 bg-white border-2 border-gray-200 rounded-xl font-medium" placeholder="Email Address" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                  <input 
+                    key="email-input"
+                    type="email" 
+                    className="w-full p-4 pl-12 bg-white border-2 border-gray-200 rounded-xl font-medium" 
+                    placeholder="Email Address" 
+                    required 
+                    value={formData.email} 
+                    onChange={e => setFormData({...formData, email: e.target.value})} 
+                  />
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 </div>
 
+                {/* PASSWORD INPUT */}
                 <div className="relative">
-                  <input type={showPassword ? 'text' : 'password'} className="w-full p-4 pl-12 pr-12 bg-white border-2 border-gray-200 rounded-xl font-medium" placeholder="Password" required value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                  <input 
+                    key="password-input"
+                    type={showPassword ? 'text' : 'password'} 
+                    className="w-full p-4 pl-12 pr-12 bg-white border-2 border-gray-200 rounded-xl font-medium" 
+                    placeholder="Password" 
+                    required 
+                    value={formData.password} 
+                    onChange={e => setFormData({...formData, password: e.target.value})} 
+                  />
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}</button>
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
 
                 {view === 'login' && (
-                  <div className="flex justify-between items-center text-sm">
+                   <div className="flex justify-between items-center text-sm">
                       <label className="flex items-center gap-2 cursor-pointer text-gray-600"><input type="checkbox" className="w-4 h-4 rounded text-blue-600" /> Remember me</label>
                       <button type="button" onClick={() => switchView('forgot')} className="text-blue-600 font-semibold">Forgot password?</button>
-                  </div>
+                   </div>
                 )}
 
                 <button type="submit" disabled={loading} className={`w-full p-4 ${view === 'admin' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} text-white rounded-xl font-bold shadow-lg hover:opacity-90 transition-all`}>
                   {loading ? <Loader className="w-5 h-5 animate-spin mx-auto" /> : (view === 'register' ? 'Create Account' : (view === 'admin' ? 'Access Dashboard' : 'Sign In'))}
                 </button>
 
-                {/* --- GOOGLE LOGIN BUTTON (Restored) --- */}
+                {/* Google & Switcher Links */}
                 {view !== 'admin' && view !== 'forgot' && (
-                  <button
-                    type="button"
-                    onClick={() => googleLogin()}
-                    disabled={googleLoading}
-                    className="w-full p-4 bg-white text-gray-700 border-2 border-gray-200 rounded-xl font-bold shadow-sm hover:bg-gray-50 flex items-center justify-center gap-3 transition-all"
-                  >
+                  <button type="button" onClick={() => googleLogin()} disabled={googleLoading} className="w-full p-4 bg-white text-gray-700 border-2 border-gray-200 rounded-xl font-bold shadow-sm hover:bg-gray-50 flex items-center justify-center gap-3 transition-all">
                     {googleLoading ? <Loader className="w-5 h-5 animate-spin" /> : (
                       <>
                         <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -222,7 +248,6 @@ const Login = ({ onLogin }) => {
                   </button>
                 )}
 
-                {/* Admin Toggle & Links */}
                 {view !== 'admin' ? (
                     <div className="space-y-4 pt-2">
                         <div className="relative flex justify-center text-xs text-gray-500 font-bold"><span>OR</span></div>

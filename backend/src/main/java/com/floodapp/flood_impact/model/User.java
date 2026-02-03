@@ -14,4 +14,8 @@ public class User {
     private String email;
     private String password;
     private String role;
+
+    // --- NEW FIELDS FOR VERIFICATION ---
+    private boolean enabled = false; // Default to false (not verified)
+    private String verificationToken;
 }
