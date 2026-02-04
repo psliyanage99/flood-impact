@@ -5,7 +5,10 @@ import { Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Loader, Arro
 import logo from '../assets/app_logoo.png';
 import { Helmet } from 'react-helmet-async';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// --- THE FIX IS HERE ---
+// We set this to empty string so it uses relative paths (e.g., "/api/auth/...")
+// This forces the browser to use the Secure Proxy we set up in vercel.json
+const API_BASE_URL = ''; 
 
 const Login = ({ onLogin }) => {
   const [view, setView] = useState('login'); // login, register, forgot, admin
@@ -22,7 +25,6 @@ const Login = ({ onLogin }) => {
     setError('');
     setSuccess('');
     // Only clear data if USER clicks the button manually.
-    // (We don't use this function after registration success, so data stays)
     setFormData({ email: '', password: '', name: '', role: 'user' });
   };
 
@@ -34,6 +36,7 @@ const Login = ({ onLogin }) => {
     
     try {
       const endpoint = view === 'register' ? '/api/auth/register' : '/api/auth/login';
+      // The request will now go to "/api/auth/..." which Vercel securely forwards to your backend
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
       const userData = response.data;
 
@@ -47,8 +50,6 @@ const Login = ({ onLogin }) => {
               setView('login'); 
               
               // PRESERVE INPUT DATA
-              // We keep email and password so the user doesn't have to retype them.
-              // We only clear the 'name' since login doesn't need it.
               setFormData(prev => ({
                   ...prev,
                   name: '', 
@@ -226,10 +227,10 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 {view === 'login' && (
-                   <div className="flex justify-between items-center text-sm">
+                    <div className="flex justify-between items-center text-sm">
                       <label className="flex items-center gap-2 cursor-pointer text-gray-600"><input type="checkbox" className="w-4 h-4 rounded text-blue-600" /> Remember me</label>
                       <button type="button" onClick={() => switchView('forgot')} className="text-blue-600 font-semibold">Forgot password?</button>
-                   </div>
+                    </div>
                 )}
 
                 <button type="submit" disabled={loading} className={`w-full p-4 ${view === 'admin' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} text-white rounded-xl font-bold shadow-lg hover:opacity-90 transition-all`}>
