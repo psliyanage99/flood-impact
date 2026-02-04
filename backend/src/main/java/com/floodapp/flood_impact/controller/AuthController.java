@@ -25,7 +25,7 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
-    // --- UPDATED: Registration with Email Verification ---
+    // --- UPDATED: Registration with Rollback ---
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -35,34 +35,41 @@ public class AuthController {
         user.setRole("user");
         user.setEnabled(false); // User cannot login yet
 
-        // Generate random token
         String token = UUID.randomUUID().toString();
         user.setVerificationToken(token);
 
+        // 1. Save User first (so we have an ID)
         User savedUser = userRepository.save(user);
 
-        // Send Email
+        // 2. Try to Send Email
         try {
             emailService.sendVerificationEmail(user.getEmail(), token);
         } catch (Exception e) {
             e.printStackTrace();
-            // Don't fail registration if email fails, but log it (in prod, handle better)
+
+            // --- CRITICAL FIX: EMAIL FAILED, SO DELETE USER (ROLLBACK) ---
+            userRepository.delete(savedUser);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error sending verification email. Registration cancelled. Please check your email address or try again later."));
         }
 
         return ResponseEntity.ok(savedUser);
     }
 
-    // --- NEW: Verify Endpoint ---
     @GetMapping("/verify")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-        Optional<User> userOpt = userRepository.findAll().stream()
-                .filter(u -> token.equals(u.getVerificationToken()))
-                .findFirst();
+        Optional<User> userOpt = userRepository.findByVerificationToken(token);
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
+            if (user.isEnabled()) {
+                return ResponseEntity.ok(Map.of("message", "Account already verified"));
+            }
+
             user.setEnabled(true);
-            user.setVerificationToken(null); // Clear token after use
+            user.setVerificationToken(null);
             userRepository.save(user);
             return ResponseEntity.ok(Map.of("message", "Email verified successfully"));
         } else {
@@ -71,7 +78,6 @@ public class AuthController {
         }
     }
 
-    // --- UPDATED: Login Check ---
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {
         Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
@@ -79,13 +85,11 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            // Check password
             if (!user.getPassword().equals(loginRequest.getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("message", "Invalid credentials"));
             }
 
-            // Check if verified
             if (!user.isEnabled()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("message", "Email not verified. Please check your inbox."));
@@ -121,7 +125,7 @@ public class AuthController {
                 newUser.setName(name);
                 newUser.setRole("user");
                 newUser.setPassword("GOOGLE_AUTH");
-                newUser.setEnabled(true); // Google users are auto-verified
+                newUser.setEnabled(true);
                 return userRepository.save(newUser);
             }
         } catch (Exception e) {
