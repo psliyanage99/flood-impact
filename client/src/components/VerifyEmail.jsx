@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { CheckCircle, XCircle, Loader, ArrowLeft, Mail } from 'lucide-react';
+import { CheckCircle, XCircle, Loader, ArrowLeft } from 'lucide-react';
 import logo from '../assets/app_logoo.png';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// FIX: Set to empty string to use the secure Vercel Proxy (relative path)
+const API_BASE_URL = '';
 
 const VerifyEmail = ({ onBackToLogin }) => {
   const [status, setStatus] = useState('verifying'); // verifying, success, error
@@ -22,7 +23,7 @@ const VerifyEmail = ({ onBackToLogin }) => {
       }
 
       try {
-        // Call your backend endpoint
+        // FIX: Use relative path (Vercel will forward this to http://13.60.179.95:8081)
         await axios.get(`${API_BASE_URL}/api/auth/verify?token=${token}`);
         setStatus('success');
         setMessage('Email verified successfully! You can now log in.');

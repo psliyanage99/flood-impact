@@ -4,7 +4,7 @@ import Dashboard from './components/Dashboard';
 import ReportForm from './components/ReportForm';
 import Header from './components/Header';
 import LocationPickerMap from './components/LocationPickerMap';
-import VerifyEmail from './components/VerifyEmail'; // Import the new component
+import VerifyEmail from './components/VerifyEmail'; 
 import { Loader } from 'lucide-react';
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
 
   useEffect(() => {
     const checkSession = () => {
-      // 1. Check if this is a verification URL (e.g. ?mode=verify)
+      // 1. Check if this is a verification URL (e.g. ?token=...)
       const params = new URLSearchParams(window.location.search);
       if (params.get('token')) {
         setIsVerifying(true);
