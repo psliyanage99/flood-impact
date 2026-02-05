@@ -17,7 +17,8 @@ import {
   Check
 } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// FIX: Set to empty string to use the secure Vercel Proxy (relative path)
+const API_BASE_URL = '';
 
 const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
   const [status, setStatus] = useState({ type: '', msg: '' });
@@ -29,7 +30,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
     description: '',
     latitude: '', 
     longitude: '', 
-    reporterName: user.name, 
+    reporterName: user?.name || '', // Safety check if user is null
     contactNumber: ''
   });
   const [loadingLoc, setLoadingLoc] = useState(false);
@@ -103,6 +104,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
     setSubmitting(true);
     
     try {
+      // FIX: Uses relative path /api/reports which Vercel forwards to AWS
       await axios.post(`${API_BASE_URL}/api/reports`, formData);
       setShowSuccess(true);
       
@@ -117,7 +119,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
           description: '',
           latitude: '', 
           longitude: '', 
-          reporterName: user.name, 
+          reporterName: user?.name || '', 
           contactNumber: ''
         });
       }, 3000);
@@ -496,8 +498,6 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
                     className="w-full p-4 bg-gray-100 border-2 border-gray-300 rounded-xl text-gray-600 font-medium placeholder-gray-500 transition-all focus:outline-none "
                     value={formData.reporterName}
                     onChange={e => setFormData({...formData, reporterName: e.target.value})}
-                    // readOnly
-                    // disabled
                   />
                 </div>
 
