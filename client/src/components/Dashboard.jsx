@@ -631,11 +631,11 @@ const Dashboard = ({ user }) => {
               </div>
 
               {/* Credits Section */}
-              <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-xs text-gray-500">
-                <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+              <div className="mt-4 pt-4 border-t border-gray-100  sm:flex-row items-center justify-center  text-xs text-gray-500">
+                {/* <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
                   <span className="text-gray-400">Concept by</span>
                   <span className="font-bold text-gray-700">Sahan Wanniarachchi</span>
-                </div>
+                </div> */}
                 <div className="flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
                   <span className="text-blue-400">Designed & Developed by</span>
                   <span className="font-bold text-blue-700">Praneeth Liyanage</span>
