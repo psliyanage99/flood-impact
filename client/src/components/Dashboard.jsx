@@ -12,7 +12,9 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 
 // --- CONFIGURATION ---
 const LOCATION_COORDS = { lat: 6.9271, lon: 79.8612 }; // Colombo Coordinates
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+// FIX: Set to empty string to use the secure Vercel Proxy (relative path)
+const API_BASE_URL = '';
 
 const Dashboard = ({ user }) => {
   // --- STATE MANAGEMENT ---
@@ -61,6 +63,7 @@ const Dashboard = ({ user }) => {
   const fetchReports = async () => {
     setLoading(true);
     try {
+      // The request will now go to "/api/reports" which Vercel securely forwards to your backend
       const res = await axios.get(`${API_BASE_URL}/api/reports`);
       const data = res.data;
       
