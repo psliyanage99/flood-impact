@@ -636,7 +636,7 @@ const Dashboard = ({ user }) => {
                   <span className="text-gray-400">Concept by</span>
                   <span className="font-bold text-gray-700">Sahan Wanniarachchi</span>
                 </div> */}
-                <div className="flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+                <div className="flex items-center justify-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
                   <span className="text-blue-400">Designed & Developed by</span>
                   <span className="font-bold text-blue-700">Praneeth Liyanage</span>
                 </div>
