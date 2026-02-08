@@ -4,7 +4,7 @@ import { MapPin, X, Navigation, Crosshair, Check, Locate, Info, Zap } from 'luci
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Custom marker icon for light theme
+
 const createCustomIcon = (color = '#3b82f6') => {
   return L.divIcon({
     className: 'custom-marker',

@@ -17,7 +17,7 @@ import {
   Check
 } from 'lucide-react';
 
-// FIX: Set to empty string to use the secure Vercel Proxy (relative path)
+
 const API_BASE_URL = '';
 
 const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
@@ -30,7 +30,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
     description: '',
     latitude: '', 
     longitude: '', 
-    reporterName: user?.name || '', // Safety check if user is null
+    reporterName: user?.name || '', 
     contactNumber: ''
   });
   const [loadingLoc, setLoadingLoc] = useState(false);
@@ -47,7 +47,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
     setFormProgress(Math.round((completed / fields.length) * 100));
   }, [formData]);
 
-  // Effect: Use initialLocation if provided (from Map Picker)
+  
   useEffect(() => {
     if (initialLocation) {
       setFormData(prev => ({
@@ -104,11 +104,8 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
     setSubmitting(true);
     
     try {
-      // FIX: Uses relative path /api/reports which Vercel forwards to AWS
       await axios.post(`${API_BASE_URL}/api/reports`, formData);
       setShowSuccess(true);
-      
-      // Reset form after delay
       setTimeout(() => {
         setShowSuccess(false);
         setFormData({
@@ -154,10 +151,10 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-      {/* Animated background pattern */}
+      
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#e0e7ff_1px,transparent_1px),linear-gradient(to_bottom,#e0e7ff_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none"></div>
       
-      {/* Success Modal */}
+      
       {showSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm animate-[fadeIn_0.3s_ease-out]">
           <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md shadow-2xl animate-[slideUp_0.5s_ease-out]">
@@ -178,7 +175,6 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
       )}
 
       <div className="relative z-10 max-w-[1200px] mx-auto">
-        {/* Header Section */}
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-4 mb-4">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
@@ -192,7 +188,7 @@ const ReportForm = ({ user, initialLocation, onOpenMapPicker }) => {
             Provide detailed information to help us respond quickly
           </p>
           
-          {/* Progress Bar */}
+          
           <div className="mt-6 max-w-md mx-auto">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600 font-semibold">Form Progress</span>

@@ -1,23 +1,22 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Changed CircleMarker to Marker
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; 
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet'; // Imported Leaflet for custom icons
+import L from 'leaflet'; 
 import axios from 'axios';
 import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, RadialLinearScale, Title, Tooltip, Legend, ArcElement, Filler } from 'chart.js';
 import { AlertTriangle, TrendingUp, MapPin, Clock, Filter, Download, RefreshCw, Bell, ChevronDown, Activity, Zap, Shield, Droplets, Navigation, Info, Users, CheckCircle, Wind, Eye, AlertCircle, CloudRain, Calendar, TrendingDown, BarChart3, Settings, Phone, Mail, Github, Linkedin, Twitter, Heart, FileText, Menu, X, CheckSquare } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import Swal from 'sweetalert2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, RadialLinearScale, Title, Tooltip, Legend, ArcElement, Filler);
 
-// --- CONFIGURATION ---
-const LOCATION_COORDS = { lat: 6.9271, lon: 79.8612 }; // Colombo Coordinates
 
-// FIX: Set to empty string to use the secure Vercel Proxy (relative path)
+const LOCATION_COORDS = { lat: 6.9271, lon: 79.8612 }; 
+
 const API_BASE_URL = '';
 
 const Dashboard = ({ user }) => {
-  // --- STATE MANAGEMENT ---
   const [activeReports, setActiveReports] = useState([]); // Map & Feed Data
   const [allStatsReports, setAllStatsReports] = useState([]); // Stats Data
   const [filteredActiveReports, setFilteredActiveReports] = useState([]); // Filtered Data
@@ -63,7 +62,7 @@ const Dashboard = ({ user }) => {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      // The request will now go to "/api/reports" which Vercel securely forwards to your backend
+      // The request will now go to "/api/reports" which Vercel securely forwards to  backend
       const res = await axios.get(`${API_BASE_URL}/api/reports`);
       const data = res.data;
       
@@ -92,7 +91,7 @@ const Dashboard = ({ user }) => {
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
-  // --- ADMIN ACTION: RESOLVE INCIDENT ---
+  // --- Admin action ---
   const handleResolve = async (id) => {
     try {
         await axios.put(`${API_BASE_URL}/api/reports/${id}/resolve`);
@@ -108,7 +107,7 @@ const Dashboard = ({ user }) => {
     return (new Date() - new Date(timestamp)) / (1000 * 60 * 60) < 24;
   };
 
-  // --- FILTERING ---
+  
   useEffect(() => {
     let filtered = activeReports; 
     if (selectedDistrict !== 'all') filtered = filtered.filter(r => r.district === selectedDistrict);
@@ -120,7 +119,7 @@ const Dashboard = ({ user }) => {
     setFilteredActiveReports(filtered);
   }, [selectedDistrict, selectedCriticality, timeRange, activeReports]);
 
-  // --- STATS CALCULATION ---
+  
   const stats = useMemo(() => {
     const total = allStatsReports.length;
     const resolved = allStatsReports.filter(r => r.status === 'resolved').length;
@@ -133,7 +132,7 @@ const Dashboard = ({ user }) => {
     return { total, active, resolved, critical, high, completionRate, criticalTrend };
   }, [allStatsReports]);
 
-  // --- CHARTS ---
+  
   const radarData = useMemo(() => {
     const axisMapping = { 'Roads': ['road'], 'Bridges': ['bridge'], 'Utilities': ['electricity', 'water'], 'Railways': ['railway', 'train'], 'Other': ['other'] };
     const categories = Object.keys(axisMapping);
@@ -187,7 +186,7 @@ const Dashboard = ({ user }) => {
     };
   }, [filteredActiveReports]);
 
-  // --- UI HELPERS ---
+  
   const exportData = () => {
     const dataStr = JSON.stringify(filteredActiveReports, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -197,7 +196,7 @@ const Dashboard = ({ user }) => {
 
   const getCriticalityColor = (c) => c === 'critical' ? '#ef4444' : c === 'high' ? '#fb923c' : c === 'medium' ? '#eab308' : '#22c55e';
 
-  // --- CUSTOM MARKER CREATION ---
+  
   const createCustomMarker = (report) => {
     const color = getCriticalityColor(report.criticality);
     const icon = 
@@ -445,8 +444,27 @@ const Dashboard = ({ user }) => {
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if(window.confirm('Mark this incident as resolved?')) handleResolve(r.id);
-                                }}
+                                  
+                                  Swal.fire({
+                                      title: 'Resolve Incident?',
+                                      text: "Are you sure you want to mark this report as resolved?",
+                                      icon: 'warning',
+                                      showCancelButton: true,
+                                      confirmButtonColor: '#10b981', 
+                                      cancelButtonColor: '#6b7280',  
+                                      confirmButtonText: 'Yes, Resolve it!',
+                                      cancelButtonText: 'Cancel'
+                                  }).then((result) => {
+                                      if (result.isConfirmed) {
+                                          handleResolve(r.id);
+                                          Swal.fire(
+                                              'Resolved!',
+                                              'The incident has been marked as resolved.',
+                                              'success'
+                                          );
+                                      }
+                                  });
+                              }}
                                 className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold py-2.5 px-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all duration-300 text-xs uppercase tracking-wide"
                               >
                                 <CheckSquare size={14} /> Mark as Resolved

@@ -5,8 +5,7 @@ import { Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Loader, Arro
 import logo from '../assets/app_logoo.png';
 import { Helmet } from 'react-helmet-async';
 
-// --- THE FIX IS HERE ---
-// We set this to empty string so it uses relative paths (e.g., "/api/auth/...")
+
 // This forces the browser to use the Secure Proxy we set up in vercel.json
 const API_BASE_URL = ''; 
 
@@ -19,13 +18,11 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Clear errors when switching views manually
+  
   const switchView = (newView) => {
     setView(newView);
     setError('');
     setSuccess('');
-    // Only clear data if USER clicks the button manually.
-    // (We don't use this function after registration success, so data stays)
     setFormData({ email: '', password: '', name: '', role: 'user' });
   };
 
@@ -37,64 +34,49 @@ const Login = ({ onLogin }) => {
     
     try {
       const endpoint = view === 'register' ? '/api/auth/register' : '/api/auth/login';
-      // The request will now go to "/api/auth/..." which Vercel securely forwards to your backend
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
       const userData = response.data;
 
-      // --- 1. HANDLE REGISTRATION SUCCESS ---
+      // --- HANDLE REGISTRATION ---
       if (view === 'register') {
-          // Inform user about email verification
+          
           setSuccess('Registration successful! Please check your email to verify your account.');
           
           setTimeout(() => {
-              // Switch to Login View
               setView('login'); 
-              
-              // PRESERVE INPUT DATA
-              // We keep email and password so the user doesn't have to retype them.
-              // We only clear the 'name' since login doesn't need it.
               setFormData(prev => ({
                   ...prev,
                   name: '', 
-                  // email and password remain populated from '...prev'
               }));
 
-              // Helper message on login screen
+              
               setSuccess('Please check your email inbox to verify your account before logging in.'); 
-          }, 3000); // Wait 3 seconds so they can read the first message
+          }, 3000); 
 
-          return; // STOP here (do not auto-login)
+          return; 
       }
 
-      // --- 2. HANDLE LOGIN SUCCESS ---
+      
       if (view === 'admin') {
           if (userData.role !== 'admin') {
               setError("Access Denied: You do not have Administrator privileges.");
               setLoading(false);
               return;
           }
-          // Admin Login Success - Bypass email verification checks if backend sends them
           setSuccess('Admin verified. Accessing Dashboard...');
       } else {
-          // Regular User Login
           setSuccess('Login successful!');
       }
-
-      // Proceed to Dashboard (Only happens for Login/Admin, not Register)
       setTimeout(() => {
         onLogin(userData);
       }, 1000);
 
     } catch (error) {
-      // Handle errors (e.g., "Email not verified")
+      // Handle errors ("Email not verified")
       const errorMsg = error.response?.data?.message || 'Authentication failed.';
       
-      // If logging in as admin, we might want to ignore "Email not verified" if that's a constraint 
-      // you want to bypass, but typically backend enforces this.
-      // However, per your request, we treat admin login as standard auth failure handling.
       setError(errorMsg);
     } finally {
-        // Stop loading spinner
         if (view === 'register' || error) {
             setLoading(false);
         } else if (view !== 'admin' && !success) {
@@ -188,11 +170,10 @@ const Login = ({ onLogin }) => {
             ) : (
               <form onSubmit={handleSubmit} className="px-6 md:px-8 pb-6 md:pb-8 space-y-4">
                 
-                {/* NAME INPUT (Only for Register) */}
                 {view === 'register' && (
                   <div className="relative">
                     <input 
-                      key="name-input" // Helps React track this field
+                      key="name-input" 
                       type="text" 
                       className="w-full p-4 pl-12 bg-white border-2 border-gray-200 rounded-xl font-medium" 
                       placeholder="Full Name" 
@@ -246,7 +227,7 @@ const Login = ({ onLogin }) => {
                   {loading ? <Loader className="w-5 h-5 animate-spin mx-auto" /> : (view === 'register' ? 'Create Account' : (view === 'admin' ? 'Access Dashboard' : 'Sign In'))}
                 </button>
 
-                {/* Google & Switcher Links */}
+                
                 {view !== 'admin' && view !== 'forgot' && (
                   <button type="button" onClick={() => googleLogin()} disabled={googleLoading} className="w-full p-4 bg-white text-gray-700 border-2 border-gray-200 rounded-xl font-bold shadow-sm hover:bg-gray-50 flex items-center justify-center gap-3 transition-all">
                     {googleLoading ? <Loader className="w-5 h-5 animate-spin" /> : (

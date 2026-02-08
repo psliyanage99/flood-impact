@@ -54,13 +54,13 @@ const Header = ({ user, onLogout, currentView, onReportClick, onDashboardClick }
               {/* Icon Container */}
               <div className="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all group-hover:scale-105 overflow-hidden">
                 
-                {/* --- CHANGE START: Replaced SVG with Logo --- */}
+                
                 <img 
                   src={logo} 
                   alt="Logo" 
                   className="w-full h-full object-cover" 
                 />
-                {/* --- CHANGE END --- */}
+                
 
               </div>
             </div>
