@@ -25,6 +25,7 @@ const Login = ({ onLogin }) => {
     setError('');
     setSuccess('');
     // Only clear data if USER clicks the button manually.
+    // (We don't use this function after registration success, so data stays)
     setFormData({ email: '', password: '', name: '', role: 'user' });
   };
 
@@ -50,6 +51,8 @@ const Login = ({ onLogin }) => {
               setView('login'); 
               
               // PRESERVE INPUT DATA
+              // We keep email and password so the user doesn't have to retype them.
+              // We only clear the 'name' since login doesn't need it.
               setFormData(prev => ({
                   ...prev,
                   name: '', 
@@ -70,8 +73,10 @@ const Login = ({ onLogin }) => {
               setLoading(false);
               return;
           }
+          // Admin Login Success - Bypass email verification checks if backend sends them
           setSuccess('Admin verified. Accessing Dashboard...');
       } else {
+          // Regular User Login
           setSuccess('Login successful!');
       }
 
@@ -83,6 +88,10 @@ const Login = ({ onLogin }) => {
     } catch (error) {
       // Handle errors (e.g., "Email not verified")
       const errorMsg = error.response?.data?.message || 'Authentication failed.';
+      
+      // If logging in as admin, we might want to ignore "Email not verified" if that's a constraint 
+      // you want to bypass, but typically backend enforces this.
+      // However, per your request, we treat admin login as standard auth failure handling.
       setError(errorMsg);
     } finally {
         // Stop loading spinner
